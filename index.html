@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>ハンドメイド・ログ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/icon192.png">
+    <meta name="theme-color" content="#b2a4d4">
+</head>
+<body>
+
+    <header>
+        <h1 id="pageTitle">ハンドメイド・ログ</h1>
+    </header>
+
+    <div class="container">
+        
+        <!-- トップビュー -->
+        <div id="topView" class="view">
+            <div class="hero-banner fade-in">
+                <img src="img/header.webp" alt="Handmade Log Header">
+            </div>
+            <div class="card fade-in">
+                <div class="section-title">メニュー</div>
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="initMaterialForm()">
+                        <span class="menu-icon">💎</span>
+                        <span class="menu-label">資材を登録</span>
+                    </div>
+                    <div class="menu-item" onclick="showView('productRegisterView'); initProductForm();">
+                        <span class="menu-icon">🎨</span>
+                        <span class="menu-label">作品を登録</span>
+                    </div>
+                    <div class="menu-item" onclick="showView('materialListView')">
+                        <span class="menu-icon">📋</span>
+                        <span class="menu-label">資材一覧</span>
+                    </div>
+                    <div class="menu-item" onclick="showView('productListView')">
+                        <span class="menu-icon">✨</span>
+                        <span class="menu-label">作品一覧</span>
+                    </div>
+                    <div class="menu-item" onclick="showView('expenseRegisterView')">
+                        <span class="menu-icon">📝</span>
+                        <span class="menu-label">経費登録</span>
+                    </div>
+                    <div class="menu-item" onclick="showView('soldListView')">
+                        <span class="menu-icon">💰</span>
+                        <span class="menu-label">成約済みリスト</span>
+                    </div>
+                    <div class="menu-item small" onclick="showView('inventoryReportView')">
+                        <span class="menu-icon">📊</span>
+                        <span class="menu-label">在庫レポート</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 資材登録ビュー -->
+        <div id="materialRegisterView" class="view hidden">
+            <div class="card">
+                <form id="materialForm">
+                    <input type="hidden" id="mId">
+                    <div class="form-group">
+                        <label>資材名 *</label>
+                        <input type="text" id="mName" placeholder="例：ヴィンテージビーズ">
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>購入金額 (¥) *</label>
+                            <input type="number" id="mPrice" placeholder="1000">
+                        </div>
+                        <div class="form-group" style="flex: 1.5;">
+                            <label>購入量 *</label>
+                            <input type="number" id="mQty" placeholder="10">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>単位 *</label>
+                            <input type="text" id="mUnit" placeholder="個">
+                        </div>
+                    </div>
+                    <div id="mStockGroup" class="form-group hidden">
+                        <label>現在の在庫量</label>
+                        <input type="number" id="mStock" step="any" placeholder="現在の正確な量を入力">
+                        <p style="font-size:0.7rem; color:#888; margin-top:4px;">※作品で使用された分を除いた「残り」を直接修正できます。単価には影響しません。</p>
+                    </div>
+                    <div class="form-group">
+                        <label>購入日</label>
+                        <input type="date" id="mDate">
+                    </div>
+                    <div class="form-group">
+                        <label>購入店</label>
+                        <input type="text" id="mShop" placeholder="パーツクラブ">
+                    </div>
+                    <div class="form-group">
+                        <label>備考</label>
+                        <textarea id="mNote" rows="3" placeholder="色味や質感など"></textarea>
+                    </div>
+                    <button type="button" id="materialSubmitBtn" onclick="saveMaterial()">資材を登録する</button>
+                    <button type="button" class="secondary mt-20" onclick="showView('materialListView')">キャンセル</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 経費登録ビュー -->
+        <div id="expenseRegisterView" class="view hidden">
+            <div class="card">
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label>用途 / 名目 *</label>
+                        <input type="text" id="eTitle" placeholder="例：梱包用BOX">
+                    </div>
+                    <div class="form-group">
+                        <label>金額 (¥) *</label>
+                        <input type="number" id="eAmount" placeholder="500">
+                    </div>
+                    <div class="form-group">
+                        <label>日付 *</label>
+                        <input type="date" id="eDate">
+                    </div>
+                    <div class="form-group">
+                        <label>備考</label>
+                        <textarea id="eNote" rows="3" placeholder="詳細など"></textarea>
+                    </div>
+                    <button type="button" onclick="saveExpense()">経費を登録する</button>
+                    <button type="button" class="secondary mt-20" onclick="showView('topView')">キャンセル</button>
+                </form>
+            </div>
+            <div class="section-title">登録済みの経費</div>
+            <div id="expenseListContainer"></div>
+        </div>
+
+        <!-- 資材一覧ビュー (既存コード) -->
+        <div id="materialListView" class="view hidden">
+            <div id="materialListContainer"></div>
+            <button class="secondary mt-20" onclick="initMaterialForm()">+ 新しい資材を追加</button>
+        </div>
+
+        <!-- 作品登録ビュー (既存コード) -->
+        <div id="productRegisterView" class="view hidden">
+            <div class="card">
+                <form id="productForm">
+                    <div class="form-group">
+                        <label>作品名 *</label>
+                        <input type="text" id="pName" placeholder="新作のイヤリング">
+                        <input type="hidden" id="pId">
+                    </div>
+                    <div class="form-group">
+                        <label>販売価格 (¥)</label>
+                        <input type="number" id="pPrice" placeholder="3000">
+                    </div>
+                    <div class="section-title">使用資材</div>
+                    <div id="pCalcArea"></div>
+                    <button type="button" class="secondary mb-20" onclick="addProductMaterialRow()">+ 資材を追加</button>
+                    
+                    <div class="total-display">
+                        <div class="total-label">合計原価</div>
+                        <div class="total-amount">¥ <span id="pTotalCost">0</span></div>
+                    </div>
+
+                    <div class="form-group mt-20">
+                        <label>作品メモ</label>
+                        <textarea id="pNote" rows="3" placeholder="こだわりポイントなど"></textarea>
+                    </div>
+
+                    <div id="pSoldDateGroup" class="form-group hidden">
+                        <label>成約日</label>
+                        <input type="date" id="pSoldDate">
+                    </div>
+                    
+                    <button type="button" onclick="saveProduct()">作品を登録する</button>
+                    <button type="button" class="secondary mt-20" onclick="showView('topView')">キャンセル</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 作品一覧ビュー (既存コード) -->
+        <div id="productListView" class="view hidden">
+            <div class="section-title">登録済みの作品</div>
+            <div id="productListContainer"></div>
+            <button class="secondary mt-20" onclick="initProductForm()">+ 新しい作品を登録</button>
+        </div>
+
+        <!-- 成約済みリストビュー -->
+        <div id="soldListView" class="view hidden">
+            <div class="card">
+                <div class="form-group">
+                    <label>表示月を選択</label>
+                    <input type="month" id="soldMonthFilter" onchange="updateSoldView()">
+                </div>
+                <div class="section-title">収支状況</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div style="background:var(--bg-color); padding:10px; border-radius:12px;">
+                        <div style="font-size:0.6rem; color:var(--text-muted);">売上</div>
+                        <div style="font-size:0.85rem; font-weight:600; color:var(--primary-purple);">¥<span id="monthlySales">0</span></div>
+                    </div>
+                    <div style="background:var(--bg-color); padding:10px; border-radius:12px;">
+                        <div style="font-size:0.6rem; color:var(--text-muted);">原価</div>
+                        <div style="font-size:0.85rem; font-weight:600; color:#888;">¥<span id="monthlyCosts">0</span></div>
+                    </div>
+                    <div style="background:var(--bg-color); padding:10px; border-radius:12px;">
+                        <div style="font-size:0.6rem; color:var(--text-muted);">経費</div>
+                        <div style="font-size:0.85rem; font-weight:600; color:#c66;">¥<span id="monthlyExpenses">0</span></div>
+                    </div>
+                </div>
+                <div style="margin-top:10px; background:var(--light-purple); padding:12px; border-radius:12px; text-align:center;">
+                    <div style="font-size:0.7rem; color:var(--primary-purple); font-weight:600;">利益合計 (売上 - 原価 - 経費)</div>
+                    <div style="font-size:1.4rem; font-weight:600; color:var(--primary-purple);">¥<span id="monthlyProfit">0</span></div>
+                </div>
+            </div>
+            
+            <div class="section-title">成約済み作品</div>
+            <div id="soldListContainer"></div>
+        </div>
+
+        <!-- 在庫レポートビュー -->
+        <div id="inventoryReportView" class="view hidden">
+            <div class="print-btn-area">
+                <button onclick="window.print()">
+                    <span>🖨️</span> 印刷する
+                </button>
+            </div>
+            <div class="card">
+                <div class="report-tabs">
+                    <div id="tabMaterial" class="report-tab active" onclick="switchReportTab('material')">資材在庫</div>
+                    <div id="tabProduct" class="report-tab" onclick="switchReportTab('product')">作品在庫</div>
+                </div>
+                <div id="inventoryReportContainer" class="report-container">
+                    <!-- JavaScriptで生成 -->
+                </div>
+                <button class="secondary mt-20" onclick="showView('topView')">戻る</button>
+            </div>
+        </div>
+
+        <!-- 成約入力モーダル -->
+        <div id="soldModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-title">成約情報の入力</div>
+                <input type="hidden" id="soldModalPId">
+                <div class="form-group">
+                    <label>販売価格 (¥) *</label>
+                    <input type="number" id="soldModalPrice" placeholder="3000">
+                </div>
+                <div class="form-group">
+                    <label>成約日 *</label>
+                    <input type="date" id="soldModalDate">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" onclick="closeSoldModal()">キャンセル</button>
+                    <button type="button" onclick="submitSoldInfo()">確定する</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav>
+        <div class="nav-btn" id="navHome" onclick="showView('topView')">
+            <span class="nav-icon">🏠</span>
+            <span>トップ</span>
+        </div>
+        <div class="nav-btn" id="navMaterial" onclick="showView('materialListView')">
+            <span class="nav-icon">💎</span>
+            <span>資材</span>
+        </div>
+        <div class="nav-btn" id="navProduct" onclick="showView('productListView')">
+            <span class="nav-icon">✨</span>
+            <span>作品</span>
+        </div>
+        <div class="nav-btn" id="navExpense" onclick="showView('expenseRegisterView')">
+            <span class="nav-icon">📝</span>
+            <span>経費</span>
+        </div>
+        <div class="nav-btn" id="navSold" onclick="showView('soldListView')">
+            <span class="nav-icon">💰</span>
+            <span>成約</span>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
