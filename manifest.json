@@ -1,6 +1,6 @@
 {
   "name": "ハンドメイド・ログ",
-  "short_name": "てしごとログ",
+  "short_name": "ハンドメイドログ",
   "description": "ハンドメイド作家のための資材管理・材料費計算ツール",
   "start_url": "./index.html",
   "display": "standalone",
