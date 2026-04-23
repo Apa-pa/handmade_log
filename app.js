@@ -115,6 +115,40 @@ function getMaterialStock(material) {
     return material.qty - usage + (material.adjustment || 0);
 }
 
+function getAllTags() {
+    const tagSet = new Set();
+    materials.forEach(m => {
+        if (m.tags && Array.isArray(m.tags)) {
+            m.tags.forEach(t => tagSet.add(t));
+        }
+    });
+    return Array.from(tagSet).sort();
+}
+
+function updateTagSuggestions() {
+    const datalist = document.getElementById('tagSuggestions');
+    if (!datalist) return;
+    const tags = getAllTags();
+    datalist.innerHTML = tags.map(t => `<option value="${t}">`).join('');
+}
+
+function getAllProductTags() {
+    const tagSet = new Set();
+    products.forEach(p => {
+        if (p.tags && Array.isArray(p.tags)) {
+            p.tags.forEach(t => tagSet.add(t));
+        }
+    });
+    return Array.from(tagSet).sort();
+}
+
+function updateProductTagSuggestions() {
+    const datalist = document.getElementById('productTagSuggestions');
+    if (!datalist) return;
+    const tags = getAllProductTags();
+    datalist.innerHTML = tags.map(t => `<option value="${t}">`).join('');
+}
+
 function initMaterialForm(editData = null) {
     document.getElementById('materialForm').reset();
     document.getElementById('mId').value = '';
@@ -130,13 +164,15 @@ function initMaterialForm(editData = null) {
         document.getElementById('mDate').value = editData.date;
         document.getElementById('mShop').value = editData.shop;
         document.getElementById('mNote').value = editData.note;
+        document.getElementById('mTags').value = (editData.tags || []).join(', ');
         
         // 編集時は在庫修正フィールドを表示
         document.getElementById('mStockGroup').classList.remove('hidden');
         document.getElementById('mStock').value = getMaterialStock(editData);
         document.getElementById('materialSubmitBtn').innerText = '変更を保存する';
     }
-    
+
+    updateTagSuggestions();
     showView('materialRegisterView');
 }
 
@@ -149,12 +185,15 @@ function saveMaterial() {
     const date = document.getElementById('mDate').value;
     const shop = document.getElementById('mShop').value;
     const note = document.getElementById('mNote').value;
+    const tagsInput = document.getElementById('mTags').value;
     const inputStock = document.getElementById('mStock').value;
 
     if (!name || !price || !qty || !unit) {
         alert('資材名、金額、購入量、単位は必須です。');
         return;
     }
+
+    const tags = tagsInput.split(/[ ,、，]+/).map(t => t.trim()).filter(t => t !== '');
 
     if (id) {
         // 更新
@@ -169,6 +208,7 @@ function saveMaterial() {
             m.date = date;
             m.shop = shop;
             m.note = note;
+            m.tags = tags;
 
             // 在庫調整の計算
             if (inputStock !== '') {
@@ -190,6 +230,7 @@ function saveMaterial() {
             date,
             shop,
             note,
+            tags,
             adjustment: 0
         };
         materials.push(material);
@@ -206,14 +247,36 @@ function renderMaterialList() {
     const list = document.getElementById('materialListContainer');
     if (!list) return;
     
+    const searchInput = document.getElementById('materialSearchInput');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let filteredMaterials = materials;
+    if (searchTerm) {
+        filteredMaterials = materials.filter(m => {
+            const nameMatch = m.name.toLowerCase().includes(searchTerm);
+            const tagMatch = m.tags && m.tags.some(t => t.toLowerCase().includes(searchTerm));
+            const shopMatch = m.shop && m.shop.toLowerCase().includes(searchTerm);
+            return nameMatch || tagMatch || shopMatch;
+        });
+    }
+    
     if (materials.length === 0) {
         list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">登録された資材はありません</p>';
         return;
     }
 
-    list.innerHTML = materials.map(m => {
+    if (filteredMaterials.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">条件に一致する資材はありません</p>';
+        return;
+    }
+
+    list.innerHTML = filteredMaterials.map(m => {
         const stock = getMaterialStock(m);
         const stockStatus = stock <= 0 ? 'color:#c66; font-weight:bold;' : (stock < m.qty * 0.2 ? 'color:#e67e22;' : '');
+        
+        const tagsHtml = (m.tags && m.tags.length > 0) 
+            ? `<div class="tag-container">${m.tags.map(t => `<span class="tag-label">${t}</span>`).join('')}</div>`
+            : '';
         
         return `
             <div class="list-item">
@@ -222,6 +285,7 @@ function renderMaterialList() {
                     <p>単価: ¥${m.unitPrice.toFixed(2)} / ${m.unit}</p>
                     <p style="${stockStatus}">在庫: ${stock.toFixed(2)} / ${m.qty} ${m.unit}</p>
                     <p style="font-size:0.7rem;">${m.shop ? m.shop + ' | ' : ''}${m.date || ''}</p>
+                    ${tagsHtml}
                 </div>
                 <div style="display:flex; gap:8px; flex-direction:column;">
                     <button onclick="editMaterial(${m.id})" style="width:auto; padding:6px 10px; background:#f0f2f5; color:var(--primary-purple); box-shadow:none; font-size:0.75rem;">編集</button>
@@ -275,10 +339,13 @@ function initProductForm(editData = null) {
                 document.getElementById('pSoldDate').value = editData.soldAt.split('T')[0];
             }
         }
+        document.getElementById('pTags').value = (editData.tags || []).join(', ');
     } else {
         addProductMaterialRow();
+        document.getElementById('pTags').value = '';
     }
     
+    updateProductTagSuggestions();
     calculateProductCost();
     showView('productRegisterView');
 }
@@ -342,12 +409,14 @@ function saveProduct() {
     const note = document.getElementById('pNote').value;
     const cost = Number(document.getElementById('pTotalCost').innerText.replace(/,/g, ''));
     const soldDate = document.getElementById('pSoldDate').value;
+    const tagsInput = document.getElementById('pTags').value;
 
     if (!name) {
         alert('作品名は必須です。');
         return;
     }
 
+    const tags = tagsInput.split(/[ ,、，]+/).map(t => t.trim()).filter(t => t !== '');
     const usedMaterials = [];
     const selects = document.querySelectorAll('.p-mat-select');
     const qtys = document.querySelectorAll('.p-mat-qty');
@@ -369,6 +438,7 @@ function saveProduct() {
             products[index].cost = cost;
             products[index].note = note;
             products[index].materials = usedMaterials;
+            products[index].tags = tags;
             if (products[index].status === 'sold' && soldDate) {
                 products[index].soldAt = new Date(soldDate).toISOString();
             }
@@ -382,6 +452,7 @@ function saveProduct() {
             cost,
             note,
             materials: usedMaterials,
+            tags: tags,
             status: 'working',
             createdAt: new Date().toISOString(),
             soldAt: null
@@ -410,20 +481,38 @@ function renderProductList() {
     const list = document.getElementById('productListContainer');
     if (!list) return;
     
-    const workingProducts = products.filter(p => p.status === 'working');
+    const searchInput = document.getElementById('productSearchInput');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let workingProducts = products.filter(p => p.status === 'working');
     
+    if (searchTerm) {
+        workingProducts = workingProducts.filter(p => {
+            const nameMatch = p.name.toLowerCase().includes(searchTerm);
+            const tagMatch = p.tags && p.tags.some(t => t.toLowerCase().includes(searchTerm));
+            const noteMatch = p.note && p.note.toLowerCase().includes(searchTerm);
+            return nameMatch || tagMatch || noteMatch;
+        });
+    }
+
     if (workingProducts.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">登録された作品はありません</p>';
+        list.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${searchTerm ? '一致する作品はありません' : '登録された作品はありません'}</p>`;
         return;
     }
 
-    list.innerHTML = workingProducts.map(p => `
-        <div class="list-item">
-            <div class="list-info">
-                <h4>${p.name}</h4>
-                <p>材料費: ¥${p.cost.toLocaleString()}${p.salesPrice ? ` | 予定価格: ¥${p.salesPrice.toLocaleString()}` : ''}</p>
-                ${p.note ? `<p style="font-size:0.75rem; color:#666;">${p.note}</p>` : ''}
-            </div>
+    list.innerHTML = workingProducts.map(p => {
+        const tagsHtml = (p.tags && p.tags.length > 0) 
+            ? `<div class="tag-container">${p.tags.map(t => `<span class="tag-label">${t}</span>`).join('')}</div>`
+            : '';
+            
+        return `
+            <div class="list-item">
+                <div class="list-info">
+                    <h4>${p.name}</h4>
+                    <p>材料費: ¥${p.cost.toLocaleString()}${p.salesPrice ? ` | 予定価格: ¥${p.salesPrice.toLocaleString()}` : ''}</p>
+                    ${p.note ? `<p style="font-size:0.75rem; color:#666;">${p.note}</p>` : ''}
+                    ${tagsHtml}
+                </div>
             <div style="display:flex; gap:8px; flex-direction:column;">
                 <div style="display:flex; gap:8px;">
                     <button onclick="markAsSold(${p.id})" style="width:auto; padding:6px 10px; background:var(--light-purple); color:var(--primary-purple); box-shadow:none; font-size:0.75rem;">成約</button>
@@ -432,7 +521,8 @@ function renderProductList() {
                 <button onclick="deleteProduct(${p.id})" style="width:auto; padding:6px 10px; background:#f5f0f0; color:#c66; box-shadow:none; font-size:0.75rem;">削除</button>
             </div>
         </div>
-    `).reverse().join('');
+        `;
+    }).reverse().join('');
 }
 
 function editProduct(id) {
@@ -522,6 +612,10 @@ function renderSoldList() {
     list.innerHTML = soldProducts.map(p => {
         const profit = p.salesPrice - p.cost;
         const soldDate = new Date(p.soldAt).toLocaleDateString('ja-JP');
+        const tagsHtml = (p.tags && p.tags.length > 0) 
+            ? `<div class="tag-container">${p.tags.map(t => `<span class="tag-label">${t}</span>`).join('')}</div>`
+            : '';
+
         return `
             <div class="list-item">
                 <div class="list-info">
@@ -529,6 +623,7 @@ function renderSoldList() {
                     <p>売上: ¥${p.salesPrice.toLocaleString()} | 原価: ¥${p.cost.toLocaleString()}</p>
                     <p style="color:var(--primary-purple); font-weight:600;">利益: ¥${profit.toLocaleString()}</p>
                     <p style="font-size:0.7rem;">成約日: ${soldDate}</p>
+                    ${tagsHtml}
                 </div>
                 <div style="display:flex; gap:8px; flex-direction:column;">
                     <button onclick="editProduct(${p.id})" style="width:auto; padding:6px 10px; background:#f0f2f5; color:var(--primary-purple); box-shadow:none; font-size:0.75rem;">編集</button>
@@ -766,3 +861,73 @@ function renderProductInventoryReport() {
     container.innerHTML = html;
 }
 
+
+// --- バックアップ・復元機能 ---
+
+const BACKUP_PREFIX = 'hml_';
+
+function exportData() {
+    const data = {};
+    // hml_ で始まる全てのデータを収集
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(BACKUP_PREFIX)) {
+            try {
+                data[key] = JSON.parse(localStorage.getItem(key));
+            } catch (e) {
+                data[key] = localStorage.getItem(key);
+            }
+        }
+    }
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const now = new Date();
+    const dateStr = now.getFullYear() + 
+                    String(now.getMonth() + 1).padStart(2, '0') + 
+                    String(now.getDate()).padStart(2, '0');
+    
+    a.href = url;
+    a.download = `handmade_log_backup_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!confirm('データを復元しますか？現在のデータはすべて上書きされます。')) {
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // データの検証（少なくとも一つは hml_ データがあるか）
+            const keys = Object.keys(data).filter(k => k.startsWith(BACKUP_PREFIX));
+            if (keys.length === 0) {
+                throw new Error('有効なバックアップデータが見つかりません。');
+            }
+
+            // 全ての hml_ データを復元
+            keys.forEach(key => {
+                const value = typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]);
+                localStorage.setItem(key, value);
+            });
+
+            alert('データの復元が完了しました。最新のデータを反映するためにページを再読み込みします。');
+            location.reload();
+        } catch (err) {
+            alert('復元に失敗しました: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}

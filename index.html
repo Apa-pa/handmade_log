@@ -55,6 +55,14 @@
                         <span class="menu-icon">📊</span>
                         <span class="menu-label">在庫レポート</span>
                     </div>
+                    <div class="backup-restore-grid">
+                        <div class="backup-restore-btn" onclick="exportData()">
+                            <span>💾</span> バックアップ
+                        </div>
+                        <div class="backup-restore-btn" onclick="document.getElementById('backupFileInput').click()">
+                            <span>📂</span> 復元
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -99,6 +107,11 @@
                         <label>備考</label>
                         <textarea id="mNote" rows="3" placeholder="色味や質感など"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>タグ（カンマ区切り）</label>
+                        <input type="text" id="mTags" placeholder="例：ビーズ, 赤, キラキラ" list="tagSuggestions">
+                        <datalist id="tagSuggestions"></datalist>
+                    </div>
                     <button type="button" id="materialSubmitBtn" onclick="saveMaterial()">資材を登録する</button>
                     <button type="button" class="secondary mt-20" onclick="showView('materialListView')">キャンセル</button>
                 </form>
@@ -135,6 +148,9 @@
 
         <!-- 資材一覧ビュー (既存コード) -->
         <div id="materialListView" class="view hidden">
+            <div class="search-box">
+                <input type="text" id="materialSearchInput" placeholder="タグで検索..." oninput="renderMaterialList()">
+            </div>
             <div id="materialListContainer"></div>
             <button class="secondary mt-20" onclick="initMaterialForm()">+ 新しい資材を追加</button>
         </div>
@@ -170,6 +186,12 @@
                         <label>成約日</label>
                         <input type="date" id="pSoldDate">
                     </div>
+
+                    <div class="form-group">
+                        <label>タグ（カンマ区切り）</label>
+                        <input type="text" id="pTags" placeholder="例：新作, イベント用, 人気" list="productTagSuggestions">
+                        <datalist id="productTagSuggestions"></datalist>
+                    </div>
                     
                     <button type="button" onclick="saveProduct()">作品を登録する</button>
                     <button type="button" class="secondary mt-20" onclick="showView('topView')">キャンセル</button>
@@ -179,6 +201,9 @@
 
         <!-- 作品一覧ビュー (既存コード) -->
         <div id="productListView" class="view hidden">
+            <div class="search-box">
+                <input type="text" id="productSearchInput" placeholder="作品をタグで検索..." oninput="renderProductList()">
+            </div>
             <div class="section-title">登録済みの作品</div>
             <div id="productListContainer"></div>
             <button class="secondary mt-20" onclick="initProductForm()">+ 新しい作品を登録</button>
@@ -280,6 +305,7 @@
         </div>
     </nav>
 
+    <input type="file" id="backupFileInput" accept=".json" style="display:none;" onchange="importData(event)">
     <script src="app.js"></script>
 </body>
 </html>
