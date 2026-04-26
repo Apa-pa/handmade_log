@@ -25,42 +25,41 @@
                 <img src="img/header.webp" alt="Handmade Log Header">
             </div>
             <div class="card fade-in">
-                <div class="section-title">メニュー</div>
                 <div class="menu-grid">
                     <div class="menu-item" onclick="initMaterialForm()">
-                        <span class="menu-icon">💎</span>
+                        <img src="icon/sozai_toroku.webp" class="menu-icon" alt="資材を登録">
                         <span class="menu-label">資材を登録</span>
                     </div>
                     <div class="menu-item" onclick="showView('productRegisterView'); initProductForm();">
-                        <span class="menu-icon">🎨</span>
+                        <img src="icon/sakuhin_toroku.webp" class="menu-icon" alt="作品を登録">
                         <span class="menu-label">作品を登録</span>
                     </div>
                     <div class="menu-item" onclick="showView('materialListView')">
-                        <span class="menu-icon">📋</span>
+                        <img src="icon/sozai_list.webp" class="menu-icon" alt="資材一覧">
                         <span class="menu-label">資材一覧</span>
                     </div>
                     <div class="menu-item" onclick="showView('productListView')">
-                        <span class="menu-icon">✨</span>
+                        <img src="icon/sakuhin_list.webp" class="menu-icon" alt="作品一覧">
                         <span class="menu-label">作品一覧</span>
                     </div>
                     <div class="menu-item" onclick="showView('expenseRegisterView')">
-                        <span class="menu-icon">📝</span>
+                        <img src="icon/keihi_toroku.webp" class="menu-icon" alt="経費登録">
                         <span class="menu-label">経費登録</span>
                     </div>
                     <div class="menu-item" onclick="showView('soldListView')">
-                        <span class="menu-icon">💰</span>
+                        <img src="icon/seiyaku_list.webp" class="menu-icon" alt="成約済みリスト">
                         <span class="menu-label">成約済みリスト</span>
                     </div>
                     <div class="menu-item small" onclick="showView('inventoryReportView')">
-                        <span class="menu-icon">📊</span>
+                        <img src="icon/zaiko_report.webp" class="menu-icon" alt="在庫レポート">
                         <span class="menu-label">在庫レポート</span>
                     </div>
                     <div class="backup-restore-grid">
                         <div class="backup-restore-btn" onclick="exportData()">
-                            <span>💾</span> バックアップ
+                            <img src="icon/backup.webp" class="btn-icon" alt="バックアップ"> バックアップ
                         </div>
                         <div class="backup-restore-btn" onclick="document.getElementById('backupFileInput').click()">
-                            <span>📂</span> 復元
+                            <img src="icon/fukugen.webp" class="btn-icon" alt="復元"> 復元
                         </div>
                     </div>
                 </div>
@@ -284,23 +283,23 @@
 
     <nav>
         <div class="nav-btn" id="navHome" onclick="showView('topView')">
-            <span class="nav-icon">🏠</span>
+            <img src="icon/home.webp" class="nav-icon" alt="トップ">
             <span>トップ</span>
         </div>
         <div class="nav-btn" id="navMaterial" onclick="showView('materialListView')">
-            <span class="nav-icon">💎</span>
+            <img src="icon/sozai_list.webp" class="nav-icon" alt="資材">
             <span>資材</span>
         </div>
         <div class="nav-btn" id="navProduct" onclick="showView('productListView')">
-            <span class="nav-icon">✨</span>
+            <img src="icon/sakuhin_list.webp" class="nav-icon" alt="作品">
             <span>作品</span>
         </div>
         <div class="nav-btn" id="navExpense" onclick="showView('expenseRegisterView')">
-            <span class="nav-icon">📝</span>
+            <img src="icon/keihi_toroku.webp" class="nav-icon" alt="経費">
             <span>経費</span>
         </div>
         <div class="nav-btn" id="navSold" onclick="showView('soldListView')">
-            <span class="nav-icon">💰</span>
+            <img src="icon/seiyaku_list.webp" class="nav-icon" alt="成約">
             <span>成約</span>
         </div>
     </nav>

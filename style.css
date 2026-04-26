@@ -161,14 +161,14 @@ button.secondary {
 .menu-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .menu-item {
     background: var(--white);
-    border-radius: 24px;
-    padding: 30px 20px;
+    border-radius: 20px;
+    padding: 16px 12px;
     text-align: center;
     box-shadow: var(--shadow);
     transition: all 0.3s ease;
@@ -181,12 +181,17 @@ button.secondary {
 }
 
 .menu-item.small {
-    padding: 15px 10px;
+    padding: 12px 10px;
 }
 
 .menu-item.small .menu-icon {
     font-size: 1.4rem;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+}
+
+.menu-item.small img.menu-icon {
+    width: 28px;
+    height: 28px;
 }
 
 .menu-item.small .menu-label {
@@ -195,12 +200,20 @@ button.secondary {
 
 .menu-icon {
     font-size: 2rem;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     display: block;
 }
 
+img.menu-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .menu-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-main);
 }
@@ -209,7 +222,7 @@ button.secondary {
 .backup-restore-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .backup-restore-btn {
@@ -218,9 +231,9 @@ button.secondary {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px;
+    padding: 10px;
     background: var(--white);
-    border-radius: 20px;
+    border-radius: 16px;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--primary-purple);
@@ -237,6 +250,12 @@ button.secondary {
 
 .backup-restore-btn span {
     font-size: 1.1rem;
+}
+
+.backup-restore-btn img.btn-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 /* リストアイテム */
@@ -283,19 +302,28 @@ nav {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: var(--text-muted);
+    color: #6b6376;
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     gap: 4px;
 }
 
 .nav-btn.active {
-    color: var(--primary-purple);
+    color: var(--text-main);
 }
 
-.nav-icon {
-    font-size: 1.4rem;
+img.nav-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.nav-btn.active img.nav-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 /* 計算エリア */

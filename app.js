@@ -18,9 +18,28 @@ const pageTitle = document.getElementById('pageTitle');
 
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
-    // サービスワーカー登録
+    // サービスワーカー登録と更新検知
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            // 新しいSWがインストールされた際の検知
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // 新しいバージョンがインストール済みになった場合（待機状態などは sw.js の skipWaiting で回避）
+                    }
+                });
+            });
+        });
+
+        // サービスワーカーが切り替わった（新しいバージョンが制御を開始した）らリロード
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
     }
     
     showView('topView');
