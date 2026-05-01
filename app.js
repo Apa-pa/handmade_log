@@ -343,6 +343,7 @@ function initProductForm(editData = null) {
     if (editData) {
         document.getElementById('pId').value = editData.id;
         document.getElementById('pName').value = editData.name;
+        document.getElementById('pNumber').value = editData.productNumber || '';
         document.getElementById('pPrice').value = editData.salesPrice;
         document.getElementById('pNote').value = editData.note;
         
@@ -362,6 +363,7 @@ function initProductForm(editData = null) {
     } else {
         addProductMaterialRow();
         document.getElementById('pTags').value = '';
+        document.getElementById('pNumber').value = '';
     }
     
     updateProductTagSuggestions();
@@ -424,6 +426,7 @@ function calculateProductCost() {
 function saveProduct() {
     const id = document.getElementById('pId').value;
     const name = document.getElementById('pName').value;
+    const productNumber = document.getElementById('pNumber').value.trim();
     const salesPrice = Number(document.getElementById('pPrice').value) || 0;
     const note = document.getElementById('pNote').value;
     const cost = Number(document.getElementById('pTotalCost').innerText.replace(/,/g, ''));
@@ -453,6 +456,7 @@ function saveProduct() {
         const index = products.findIndex(p => p.id == id);
         if (index !== -1) {
             products[index].name = name;
+            products[index].productNumber = productNumber;
             products[index].salesPrice = salesPrice;
             products[index].cost = cost;
             products[index].note = note;
@@ -467,6 +471,7 @@ function saveProduct() {
         const product = {
             id: Date.now(),
             name,
+            productNumber,
             salesPrice,
             cost,
             note,
@@ -527,7 +532,7 @@ function renderProductList() {
         return `
             <div class="list-item">
                 <div class="list-info">
-                    <h4>${p.name}</h4>
+                    <h4>${p.name}${p.productNumber ? ` <span style="font-size:0.7rem; color:#aaa; font-weight:normal;">No.${p.productNumber}</span>` : ''}</h4>
                     <p>材料費: ¥${p.cost.toLocaleString()}${p.salesPrice ? ` | 予定価格: ¥${p.salesPrice.toLocaleString()}` : ''}</p>
                     ${p.note ? `<p style="font-size:0.75rem; color:#666;">${p.note}</p>` : ''}
                     ${tagsHtml}
@@ -638,7 +643,7 @@ function renderSoldList() {
         return `
             <div class="list-item">
                 <div class="list-info">
-                    <h4>${p.name}</h4>
+                    <h4>${p.name}${p.productNumber ? ` <span style="font-size:0.7rem; color:#aaa; font-weight:normal;">No.${p.productNumber}</span>` : ''}</h4>
                     <p>売上: ¥${p.salesPrice.toLocaleString()} | 原価: ¥${p.cost.toLocaleString()}</p>
                     <p style="color:var(--primary-purple); font-weight:600;">利益: ¥${profit.toLocaleString()}</p>
                     <p style="font-size:0.7rem;">成約日: ${soldDate}</p>
